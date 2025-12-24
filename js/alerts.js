@@ -1,123 +1,135 @@
-(function(){
-  function showAlert(message, type = 'info', timeout = 3000) {
+(function () {
+  function showAlert(message, type = "info", timeout = 3000) {
     try {
-      const id = 'site-alerts';
-      let container = document.getElementById(id);
-      if (!container) {
-        container = document.createElement('div');
-        container.id = id;
-        container.className = 'alerts-container';
-        document.body.appendChild(container);
+      const id = "site-alerts";
+      let $container = $("#" + id);
+      if (!$container.length) {
+        $container = $("<div>").attr("id", id).addClass("alerts-container");
+        $("body").append($container);
       }
 
-      const el = document.createElement('div');
-      el.className = `alert alert-${type}`;
+      const $el = $("<div>").addClass(`alert alert-${type}`);
+      const $msgWrap = $("<div>").addClass("alert-message");
 
-      const msgWrap = document.createElement('div');
-      msgWrap.className = 'alert-message';
-
-      let icon = null;
+      let $icon = null;
       switch (type) {
-        case 'success':
-          icon = document.createElement('i');
-          icon.className = 'fa-regular fa-circle-check';
-          icon.style.color = '#12c009ff';
+        case "success":
+          $icon = $("<i>")
+            .addClass("fa-regular fa-circle-check")
+            .css("color", "#12c009ff");
           break;
-        case 'info':
-          icon = document.createElement('i');
-          icon.className = 'fa-solid fa-circle-info';
-          icon.style.color = '#0386e9ff';
+        case "info":
+          $icon = $("<i>")
+            .addClass("fa-solid fa-circle-info")
+            .css("color", "#0386e9ff");
           break;
-        case 'fail':
-        case 'error':
-        case 'danger':
-          icon = document.createElement('i');
-          icon.className = 'fa-solid fa-triangle-exclamation';
-          icon.style.color = '#ed0c0c';
+        case "fail":
+        case "error":
+        case "danger":
+          $icon = $("<i>")
+            .addClass("fa-solid fa-triangle-exclamation")
+            .css("color", "#ed0c0c");
           break;
       }
-      if (icon) msgWrap.appendChild(icon);
+      if ($icon) $msgWrap.append($icon);
 
-      const msgText = document.createElement('span');
-      msgText.textContent = message;
-      msgWrap.appendChild(msgText);
+      const $msgText = $("<span>").text(message);
+      $msgWrap.append($msgText);
+      $el.append($msgWrap);
 
-      el.appendChild(msgWrap);
+      const $close = $("<span>")
+        .addClass("closebtn")
+        .attr("role", "button")
+        .html("&times;");
+      $close.on("click", function () {
+        $el.remove();
+      });
+      $el.append($close);
 
-      const close = document.createElement('span');
-      close.className = 'closebtn';
-      close.setAttribute('role', 'button');
-      close.innerHTML = '&times;';
-      close.addEventListener('click', () => el.remove());
-      el.appendChild(close);
+      $container.append($el);
 
-      container.appendChild(el);
+      setTimeout(function () {
+        $el.addClass("show");
+      }, 10);
 
-      setTimeout(() => el.classList.add('show'), 10);
-
-      const t = setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 180); }, timeout);
-      return el;
+      const t = setTimeout(function () {
+        $el.removeClass("show");
+        setTimeout(function () {
+          $el.remove();
+        }, 180);
+      }, timeout);
+      return $el[0];
     } catch (e) {
-      try { window.alert(message); } catch (er) {}
+      try {
+        window.alert(message);
+      } catch (er) {}
     }
   }
 
-  if (typeof window !== 'undefined') window.showAlert = showAlert;
+  if (typeof window !== "undefined") window.showAlert = showAlert;
 
   function showConfirm(message, opts) {
     opts = opts || {};
-    return new Promise((resolve) => {
+    return new Promise(function (resolve) {
       try {
-        const id = 'site-alerts';
-        let container = document.getElementById(id);
-        if (!container) {
-          container = document.createElement('div');
-          container.id = id;
-          container.className = 'alerts-container';
-          document.body.appendChild(container);
+        const id = "site-alerts";
+        let $container = $("#" + id);
+        if (!$container.length) {
+          $container = $("<div>").attr("id", id).addClass("alerts-container");
+          $("body").append($container);
         }
 
-        const wrap = document.createElement('div');
-        wrap.className = 'confirm-wrap';
+        const $wrap = $("<div>").addClass("confirm-wrap");
+        const $box = $("<div>").addClass("confirm-box");
+        const $msg = $("<div>").addClass("confirm-message").text(message);
+        const $actions = $("<div>").addClass("confirm-actions");
 
-        const box = document.createElement('div');
-        box.className = 'confirm-box';
+        const $btnCancel = $("<button>")
+          .addClass("btn btn-outline-light btn-sm")
+          .text(opts.cancelText || "Cancel");
+        const $btnOk = $("<button>")
+          .addClass("btn btn-primary btn-sm")
+          .text(opts.confirmText || "Confirm");
 
-        const msg = document.createElement('div');
-        msg.className = 'confirm-message';
-        msg.textContent = message;
+        $btnCancel.on("click", function () {
+          $wrap.remove();
+          resolve(false);
+        });
+        $btnOk.on("click", function () {
+          $wrap.remove();
+          resolve(true);
+        });
 
-        const actions = document.createElement('div');
-        actions.className = 'confirm-actions';
+        $actions.append($btnCancel, $btnOk);
+        $box.append($msg, $actions);
+        $wrap.append($box);
+        $container.append($wrap);
 
-        const btnCancel = document.createElement('button');
-        btnCancel.className = 'btn btn-outline-light btn-sm';
-        btnCancel.textContent = opts.cancelText || 'Cancel';
-        const btnOk = document.createElement('button');
-        btnOk.className = 'btn btn-primary btn-sm';
-        btnOk.textContent = opts.confirmText || 'Confirm';
-
-        btnCancel.addEventListener('click', () => { wrap.remove(); resolve(false); });
-        btnOk.addEventListener('click', () => { wrap.remove(); resolve(true); });
-
-        actions.appendChild(btnCancel);
-        actions.appendChild(btnOk);
-        box.appendChild(msg);
-        box.appendChild(actions);
-        wrap.appendChild(box);
-        container.appendChild(wrap);
-
-        setTimeout(() => wrap.classList.add('show'), 10);
-        const cleanup = (val) => { wrap.classList.remove('show'); setTimeout(() => wrap.remove(), 180); resolve(val); };
-        btnCancel.addEventListener('click', () => cleanup(false));
-        btnOk.addEventListener('click', () => cleanup(true));
-        wrap.addEventListener('click', (e) => { if (e.target === wrap) cleanup(false); });
-        btnOk.focus();
+        setTimeout(function () {
+          $wrap.addClass("show");
+        }, 10);
+        const cleanup = function (val) {
+          $wrap.removeClass("show");
+          setTimeout(function () {
+            $wrap.remove();
+          }, 180);
+          resolve(val);
+        };
+        $btnCancel.on("click", function () {
+          cleanup(false);
+        });
+        $btnOk.on("click", function () {
+          cleanup(true);
+        });
+        $wrap.on("click", function (e) {
+          if (e.target === $wrap[0]) cleanup(false);
+        });
+        $btnOk.focus();
       } catch (e) {
         resolve(false);
       }
     });
   }
 
-  if (typeof window !== 'undefined') window.showConfirm = showConfirm;
+  if (typeof window !== "undefined") window.showConfirm = showConfirm;
 })();
